@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [16.0.0]
+        node: [16.0.0-alpine3.13]
         pnpm: [5.14.3]
     steps:
       -
@@ -27,17 +27,12 @@ jobs:
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       -
-        name: Build and test
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          target: test
-          load: true
-      -
         name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: .
+          file: ./pnpm/Dockerfile
+          build-args: |
+            node=${{ matrix.node }}
+            pnpm=${{ matrix.pnpm }}
           push: true
-          target: prod
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/pnpm:${{ matrix.node }}-${{ matrix.pnpm }}
